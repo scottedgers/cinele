@@ -18,23 +18,26 @@
     HINTS: {
       year: {
         id: "year",
-        label: "🗓️ Year Hint",
-        buttonLabel: "💡 Year Hint",
-        prefix: "🗓️ Year:",
+        label: "Release Year Hint",
+        categoryTitle: "Release Year",
+        iconSvg: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`,
+        prefix: "Release Year:",
         points: 6
       },
       director: {
         id: "director",
-        label: "🎬 Director Hint",
-        buttonLabel: "💡 Director Hint",
-        prefix: "🎬 Director:",
+        label: "Director Hint",
+        categoryTitle: "Director",
+        iconSvg: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3Z"></path><path d="m6.2 5.3 3.1 3.9"></path><path d="m12.4 3.4 3.1 4"></path><path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path></svg>`,
+        prefix: "Director:",
         points: 8
       },
       actor: {
         id: "actor",
-        label: "🌟 Lead Cast Hint",
-        buttonLabel: "💡 Lead Cast Hint",
-        prefix: "🌟 Lead Cast:",
+        label: "Lead Cast Hint",
+        categoryTitle: "Lead Cast",
+        iconSvg: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`,
+        prefix: "Lead Cast:",
         points: 10
       }
     }
@@ -550,13 +553,31 @@
       if (unlockedByHint) {
         btn.classList.add("revealed");
         btn.disabled = true;
-        btn.innerHTML = `<span>${meta.prefix}</span> <span class="hint-chip-value">${escapeHtml(val)}</span>`;
+        btn.innerHTML = `
+          <div class="hint-chip-top">
+            <span class="hint-chip-cat">${meta.iconSvg} ${meta.categoryTitle}</span>
+            <span class="hint-chip-cost">UNLOCKED (-${meta.points})</span>
+          </div>
+          <span class="hint-chip-value">${escapeHtml(val)}</span>
+        `;
       } else if (solvedByGuess) {
         btn.classList.add("solved");
         btn.disabled = true;
-        btn.innerHTML = `<span>${meta.prefix}</span> <span class="hint-chip-value">${escapeHtml(val)} ✓</span>`;
+        btn.innerHTML = `
+          <div class="hint-chip-top">
+            <span class="hint-chip-cat">${meta.iconSvg} ${meta.categoryTitle}</span>
+            <span class="hint-chip-cost">MATCHED ✓</span>
+          </div>
+          <span class="hint-chip-value">${escapeHtml(val)}</span>
+        `;
       } else {
-        btn.innerHTML = `<span class="hint-chip-label">${meta.buttonLabel}</span> <span class="hint-chip-cost">-${meta.points}</span>`;
+        btn.innerHTML = `
+          <div class="hint-chip-top">
+            <span class="hint-chip-cat">${meta.iconSvg} ${meta.categoryTitle}</span>
+            <span class="hint-chip-cost">-${meta.points} PTS</span>
+          </div>
+          <span class="hint-chip-action">Reveal Clue →</span>
+        `;
       }
     });
   }

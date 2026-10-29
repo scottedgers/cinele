@@ -465,72 +465,175 @@ body {
   cursor: not-allowed;
 }
 
-/* === HINT / CLUE BAR === */
+/* === HINT / CLUE TELEMETRY DECK === */
 .hint-bar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
   margin-top: 10px;
 }
 
 .hint-chip {
-  background: rgba(18, 24, 38, 0.78);
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  color: var(--text-secondary);
-  border-radius: 99px;
-  padding: 6px 12px;
+  position: relative;
+  overflow: hidden;
+  background: rgba(15, 21, 34, 0.78);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
   font-family: var(--font-sans);
-  font-size: 0.76rem;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
+  color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
+  text-align: left;
   cursor: pointer;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 6px 18px -6px rgba(0, 0, 0, 0.45);
+}
+
+.hint-chip::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(34, 211, 238, 0.35);
+  transition: all 0.2s ease;
 }
 
 .hint-chip:hover:not(:disabled) {
-  border-color: rgba(34, 211, 238, 0.55);
-  background: rgba(34, 211, 238, 0.12);
+  border-color: rgba(34, 211, 238, 0.52);
+  background: linear-gradient(145deg, rgba(21, 31, 50, 0.92) 0%, rgba(15, 22, 36, 0.96) 100%);
   color: #ffffff;
   transform: translateY(-1px);
+  box-shadow: 0 8px 22px -6px rgba(34, 211, 238, 0.2);
+}
+
+.hint-chip:hover:not(:disabled)::before {
+  background: var(--accent-cyan);
+  box-shadow: 0 0 8px var(--accent-cyan);
+}
+
+.hint-chip-top {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.hint-chip-cat {
+  font-family: var(--font-mono);
+  font-size: 0.63rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.hint-chip-cat svg {
+  color: var(--accent-cyan);
+  flex-shrink: 0;
 }
 
 .hint-chip-cost {
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: 0.64rem;
   font-weight: 700;
-  color: #fda4af;
-  background: rgba(244, 63, 94, 0.16);
-  border: 1px solid rgba(244, 63, 94, 0.35);
+  color: var(--accent-cyan-bright);
+  background: rgba(34, 211, 238, 0.12);
+  border: 1px solid rgba(34, 211, 238, 0.28);
   padding: 1px 6px;
-  border-radius: 99px;
+  border-radius: 6px;
+}
+
+.hint-chip-action {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.hint-chip:hover:not(:disabled) .hint-chip-action {
+  color: #ffffff;
 }
 
 .hint-chip.revealed {
-  background: rgba(245, 158, 11, 0.15);
-  border-color: rgba(251, 191, 36, 0.5);
-  color: #fef3c7;
+  background: var(--tile-close-bg);
+  border-color: var(--tile-close-border);
+  color: #ffffff;
   cursor: default;
 }
 
-.hint-chip.revealed .hint-chip-value {
-  font-weight: 800;
+.hint-chip.revealed::before {
+  background: var(--tile-close-bar);
+  box-shadow: 0 0 8px var(--tile-close-bar);
+}
+
+.hint-chip.revealed .hint-chip-cat {
+  color: rgba(254, 243, 199, 0.8);
+}
+
+.hint-chip.revealed .hint-chip-cat svg {
+  color: #fbbf24;
+}
+
+.hint-chip.revealed .hint-chip-cost {
   color: #fde68a;
+  background: rgba(245, 158, 11, 0.22);
+  border-color: rgba(251, 191, 36, 0.45);
+}
+
+.hint-chip-value {
+  font-family: var(--font-display);
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.25;
 }
 
 .hint-chip.solved {
-  background: rgba(16, 185, 129, 0.14);
-  border-color: rgba(52, 211, 153, 0.45);
-  color: #d1fae5;
+  background: var(--tile-correct-bg);
+  border-color: var(--tile-correct-border);
+  color: #ffffff;
   cursor: default;
 }
 
-.hint-chip.solved .hint-chip-value {
-  font-weight: 800;
+.hint-chip.solved::before {
+  background: var(--tile-correct-bar);
+  box-shadow: 0 0 8px var(--tile-correct-bar);
+}
+
+.hint-chip.solved .hint-chip-cat {
+  color: rgba(209, 250, 229, 0.85);
+}
+
+.hint-chip.solved .hint-chip-cat svg {
+  color: #34d399;
+}
+
+.hint-chip.solved .hint-chip-cost {
   color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.22);
+  border-color: rgba(52, 211, 153, 0.45);
+}
+
+@media (max-width: 600px) {
+  .hint-bar {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+  .hint-chip {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
 }
 
 .guess-badges-group {
