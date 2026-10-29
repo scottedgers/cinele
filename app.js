@@ -316,7 +316,7 @@
       return score >= 10 ? "🎞️ Unfinished Reel (Clue Salvage)" : "💀 Box Office Bomb";
     }
     if (score >= 95) return "🏆 Certified Masterpiece";
-    if (score >= 80) return "🌟 Critics' Pick";
+    if (score >= 80) return "🌟 Director's Cut";
     if (score >= 65) return "🍅 Certified Fresh";
     if (score >= 50) return "🍿 Crowd Pleaser";
     if (score >= 30) return "🎟️ Matinee Mixed";
@@ -1080,7 +1080,7 @@
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(() => {
-        showToast("Copied Critic Score & emoji grid to clipboard!");
+        showToast("Copied Score & emoji grid to clipboard!");
       });
     } else {
       showToast("Result ready to share!");
@@ -1319,7 +1319,7 @@
           dom.catalogActiveTag.classList.remove("hidden");
         }
         dom.catalogFilterInput.focus();
-        showToast(`📖 Film Archive unlocked (-${SCORE_CONFIG.CATALOG_PENALTY} Critic Score)`);
+        showToast(`📖 Film Archive unlocked (-${SCORE_CONFIG.CATALOG_PENALTY} Score)`);
       });
     }
 

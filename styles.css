@@ -300,7 +300,7 @@ body {
 .status-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 8px;
   flex-wrap: wrap;
   margin-bottom: 10px;
@@ -310,6 +310,7 @@ body {
 .status-left-group {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   flex-wrap: wrap;
 }
