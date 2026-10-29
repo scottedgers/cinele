@@ -1,20 +1,43 @@
-// CINELE — Theaterle-inspired Movie Guessing Game
-// Core game engine, 6-category clue comparison logic, autocomplete, and stats
+// CINELE — Daily Cinema Deduction Game
+// Core game engine, 6-category clue comparison logic, hint system, autocomplete, and stats
 
 (function () {
   "use strict";
 
-  const MAX_GUESSES = 8;
+  const MAX_GUESSES = 10;
   const YEAR_CLOSE_THRESHOLD = 5;
 
-  // 100-Point Critic Score Configuration (extensible for future clues/hints)
+  // 100-Point Score Configuration (calibrated for 10 guesses + Archive & Hints)
   const SCORE_CONFIG = {
     MAX_SCORE: 100,
-    WRONG_GUESS_PENALTY: 10,
-    CATALOG_PENALTY: 15,
+    WRONG_GUESS_PENALTY: 8,
+    CATALOG_PENALTY: 12,
     SALVAGE_GREEN_PTS: 3,
     SALVAGE_GOLD_PTS: 1,
-    MIN_WIN_SCORE: 5
+    MIN_WIN_SCORE: 5,
+    HINTS: {
+      year: {
+        id: "year",
+        label: "🗓️ Year Hint",
+        buttonLabel: "💡 Year Hint",
+        prefix: "🗓️ Year:",
+        points: 6
+      },
+      director: {
+        id: "director",
+        label: "🎬 Director Hint",
+        buttonLabel: "💡 Director Hint",
+        prefix: "🎬 Director:",
+        points: 8
+      },
+      actor: {
+        id: "actor",
+        label: "🌟 Lead Cast Hint",
+        buttonLabel: "💡 Lead Cast Hint",
+        prefix: "🌟 Lead Cast:",
+        points: 10
+      }
+    }
   };
 
   // Source material families for "Close / Gold" matching
@@ -49,9 +72,9 @@
     status: "playing", // "playing" | "won" | "lost"
     dateKey: null,
     dailyNumber: 1,
-    catalogUsed: false, // flat one-time -15 penalty per round when Archive opened
+    catalogUsed: false, // flat one-time -12 penalty per round when Archive opened
     catalogGuessIndices: [], // 0-based guess indices where Archive was unlocked/used
-    cluePenalties: [] // extensible array of { id, label, points, guessIndex } for future hints
+    cluePenalties: [] // array of { id, label, points, guessIndex } for unlocked hints
   };
 
   let selectedMovieId = null;
@@ -76,6 +99,11 @@
     btnClearSearch: document.getElementById("btn-clear-search"),
     btnSubmitGuess: document.getElementById("btn-submit-guess"),
     autocompleteList: document.getElementById("autocomplete-list"),
+
+    hintBar: document.getElementById("hint-bar"),
+    btnHintYear: document.getElementById("btn-hint-year"),
+    btnHintDirector: document.getElementById("btn-hint-director"),
+    btnHintActor: document.getElementById("btn-hint-actor"),
 
     resultBanner: document.getElementById("result-banner"),
     resultStatusBadge: document.getElementById("result-status-badge"),
@@ -297,7 +325,7 @@
   }
 
   // =========================================================================
-  // 100-POINT CRITIC SCORE ENGINE (EXTENSIBLE FOR ARCHIVE & FUTURE CLUES)
+  // 100-POINT SCORE ENGINE (CALIBRATED FOR 10 GUESSES, ARCHIVE & HINTS)
   // =========================================================================
   function normalizeGameState(state) {
     if (!state) return state;
@@ -360,8 +388,9 @@
       const rawSalvage =
         greenCount * SCORE_CONFIG.SALVAGE_GREEN_PTS +
         goldCount * SCORE_CONFIG.SALVAGE_GOLD_PTS;
-      const lossArchiveDeduction = state.catalogUsed ? 5 : 0;
-      const finalLossScore = Math.max(0, rawSalvage - lossArchiveDeduction);
+      const lossArchiveDeduction = state.catalogUsed ? 4 : 0;
+      const lossHintDeduction = state.cluePenalties.length * 2;
+      const finalLossScore = Math.max(0, rawSalvage - lossArchiveDeduction - lossHintDeduction);
 
       const breakdown = [
         {
@@ -371,7 +400,14 @@
       ];
       if (state.catalogUsed) {
         breakdown.push({ text: `📖 Film Archive: -${lossArchiveDeduction}`, type: "penalty" });
-      } else {
+      }
+      if (state.cluePenalties.length > 0) {
+        breakdown.push({
+          text: `💡 ${state.cluePenalties.length} ${state.cluePenalties.length === 1 ? "Hint" : "Hints"}: -${lossHintDeduction}`,
+          type: "penalty"
+        });
+      }
+      if (!state.catalogUsed && state.cluePenalties.length === 0) {
         breakdown.push({ text: "🧠 Pure Memory", type: "bonus" });
       }
 
@@ -408,19 +444,21 @@
         text: `📖 Film Archive: -${SCORE_CONFIG.CATALOG_PENALTY}`,
         type: "penalty"
       });
-    } else {
+    }
+
+    state.cluePenalties.forEach((p) => {
+      breakdown.push({
+        text: `${p.label || "Hint"}: -${p.points}`,
+        type: "penalty"
+      });
+    });
+
+    if (!state.catalogUsed && state.cluePenalties.length === 0) {
       breakdown.push({
         text: "🧠 Pure Memory: No Penalty",
         type: "bonus"
       });
     }
-
-    state.cluePenalties.forEach((p) => {
-      breakdown.push({
-        text: `${p.label || "Clue"}: -${p.points}`,
-        type: "penalty"
-      });
-    });
 
     return {
       score: finalScore,
@@ -441,7 +479,90 @@
     updateLiveScoreAndCatalogUI();
   }
 
+  // =========================================================================
+  // HINT / CLUE SYSTEM (YEAR, DIRECTOR, LEAD CAST)
+  // =========================================================================
+  function getHintTargetDisplayValue(hintType, targetMovie) {
+    if (!targetMovie) return "";
+    if (hintType === "year") return String(targetMovie.year);
+    if (hintType === "director") return targetMovie.director;
+    if (hintType === "actor") return targetMovie.actors.join(", ");
+    return "";
+  }
+
+  function isCategorySolvedOnBoard(hintType, targetMovie) {
+    if (!targetMovie) return false;
+    return gameState.guesses.some((gId) => {
+      const gm = movieById.get(gId);
+      if (!gm) return false;
+      const ev = evaluateGuess(gm, targetMovie);
+      return ev[hintType] && ev[hintType].status === "correct";
+    });
+  }
+
+  function unlockHint(hintType) {
+    normalizeGameState(gameState);
+    if (gameState.status !== "playing") return;
+
+    const hintMeta = SCORE_CONFIG.HINTS[hintType];
+    const targetMovie = movieById.get(gameState.targetMovieId);
+    if (!hintMeta || !targetMovie) return;
+
+    const alreadyUnlocked = gameState.cluePenalties.some((p) => p.id === hintType);
+    if (alreadyUnlocked) return;
+
+    if (isCategorySolvedOnBoard(hintType, targetMovie)) {
+      showToast("You already matched this clue on the board!");
+      return;
+    }
+
+    gameState.cluePenalties.push({
+      id: hintType,
+      label: hintMeta.label,
+      points: hintMeta.points,
+      guessIndex: gameState.guesses.length
+    });
+
+    saveCurrentState();
+    updateLiveScoreAndCatalogUI();
+
+    const valueStr = getHintTargetDisplayValue(hintType, targetMovie);
+    showToast(`${hintMeta.prefix} ${valueStr} (-${hintMeta.points} Score)`);
+  }
+
+  function updateHintChipsUI(targetMovie) {
+    const chipMap = [
+      { type: "year", btn: dom.btnHintYear },
+      { type: "director", btn: dom.btnHintDirector },
+      { type: "actor", btn: dom.btnHintActor }
+    ];
+
+    chipMap.forEach(({ type, btn }) => {
+      if (!btn) return;
+      const meta = SCORE_CONFIG.HINTS[type];
+      const unlockedByHint = gameState.cluePenalties.some((p) => p.id === type);
+      const solvedByGuess = isCategorySolvedOnBoard(type, targetMovie);
+      const val = getHintTargetDisplayValue(type, targetMovie);
+
+      btn.classList.remove("revealed", "solved");
+      btn.disabled = false;
+
+      if (unlockedByHint) {
+        btn.classList.add("revealed");
+        btn.disabled = true;
+        btn.innerHTML = `<span>${meta.prefix}</span> <span class="hint-chip-value">${escapeHtml(val)}</span>`;
+      } else if (solvedByGuess) {
+        btn.classList.add("solved");
+        btn.disabled = true;
+        btn.innerHTML = `<span>${meta.prefix}</span> <span class="hint-chip-value">${escapeHtml(val)} ✓</span>`;
+      } else {
+        btn.innerHTML = `<span class="hint-chip-label">${meta.buttonLabel}</span> <span class="hint-chip-cost">-${meta.points}</span>`;
+      }
+    });
+  }
+
   function updateLiveScoreAndCatalogUI() {
+    normalizeGameState(gameState);
     const targetMovie = movieById.get(gameState.targetMovieId);
     const scoreInfo = calculateCriticScore(gameState, targetMovie);
     const isPlaying = gameState.status === "playing";
@@ -450,14 +571,22 @@
       dom.liveScoreValue.textContent = `${scoreInfo.score}/100`;
     }
     if (dom.liveMemoryBadge) {
-      if (gameState.catalogUsed) {
-        dom.liveMemoryBadge.textContent = `📖 Archive (-${SCORE_CONFIG.CATALOG_PENALTY})`;
-        dom.liveMemoryBadge.classList.remove("pure");
-        dom.liveMemoryBadge.classList.add("penalized");
-      } else {
+      const hintCount = gameState.cluePenalties.length;
+      const hintPts = gameState.cluePenalties.reduce((s, p) => s + (p.points || 0), 0);
+      const catPts = gameState.catalogUsed ? SCORE_CONFIG.CATALOG_PENALTY : 0;
+      const totalAssistPts = hintPts + catPts;
+
+      if (!gameState.catalogUsed && hintCount === 0) {
         dom.liveMemoryBadge.textContent = "🧠 Pure Memory";
         dom.liveMemoryBadge.classList.add("pure");
         dom.liveMemoryBadge.classList.remove("penalized");
+      } else {
+        const parts = [];
+        if (gameState.catalogUsed) parts.push("📖 Archive");
+        if (hintCount > 0) parts.push(`💡 ${hintCount} ${hintCount === 1 ? "Hint" : "Hints"}`);
+        dom.liveMemoryBadge.textContent = `${parts.join(" • ")} (-${totalAssistPts})`;
+        dom.liveMemoryBadge.classList.remove("pure");
+        dom.liveMemoryBadge.classList.add("penalized");
       }
     }
 
@@ -473,6 +602,8 @@
         dom.catalogBtnBadge.className = "catalog-btn-badge penalty";
       }
     }
+
+    updateHintChipsUI(targetMovie);
   }
 
   // =========================================================================
@@ -592,12 +723,14 @@
         const evalResult = evaluateGuess(guessMovie, targetMovie);
         const shouldAnimate = animateLatest && idx === numGuesses - 1;
         const usedCatalogOnRow = gameState.catalogGuessIndices.includes(idx);
+        const hintsOnRow = gameState.cluePenalties.filter((p) => p.guessIndex === idx);
         const rowEl = createGuessRowElement(
           guessMovie,
           evalResult,
           idx + 1,
           shouldAnimate,
-          usedCatalogOnRow
+          usedCatalogOnRow,
+          hintsOnRow
         );
         dom.guessesContainer.appendChild(rowEl);
       });
@@ -628,10 +761,24 @@
     evalResult,
     guessNumber,
     animate,
-    usedCatalogOnRow = false
+    usedCatalogOnRow = false,
+    hintsOnRow = []
   ) {
     const block = document.createElement("div");
     block.className = "guess-block";
+
+    const badgesHtml = [];
+    if (usedCatalogOnRow) {
+      badgesHtml.push(
+        `<span class="guess-catalog-tag" title="Film Archive used on this guess">📖 Archive</span>`
+      );
+    }
+    if (hintsOnRow && hintsOnRow.length > 0) {
+      const hintNames = hintsOnRow.map((h) => h.label).join(", ");
+      badgesHtml.push(
+        `<span class="guess-hint-tag" title="${escapeHtml(hintNames)}">💡 ${hintsOnRow.length === 1 ? "Hint" : `${hintsOnRow.length} Hints`}</span>`
+      );
+    }
 
     const titleBar = document.createElement("div");
     titleBar.className = "guess-title-bar";
@@ -640,11 +787,9 @@
         <span class="guess-num-tag">#${guessNumber}</span>
         <span>${escapeHtml(guessMovie.title)}</span>
       </div>
-      ${
-        usedCatalogOnRow
-          ? `<span class="guess-catalog-tag" title="Film Archive used on this guess">📖 Archive</span>`
-          : ""
-      }
+      <div class="guess-badges-group">
+        ${badgesHtml.join("")}
+      </div>
     `;
     block.appendChild(titleBar);
 
@@ -743,7 +888,7 @@
           ? "🏆 BLOCKBUSTER! FIRST TRY!"
           : tries <= 3
           ? "🌟 ACADEMY AWARD WORTHY!"
-          : tries <= 6
+          : tries <= 7
           ? "🎬 STANDING OVATION!"
           : "🍿 JUST BEFORE THE CREDITS!";
       dom.resultStatusBadge.textContent = `${praise} (${tries}/${MAX_GUESSES})`;
@@ -762,7 +907,7 @@
       <span class="meta-pill"><strong>Lead Cast:</strong> ${escapeHtml(targetMovie.actors.join(", "))}</span>
     `;
 
-    // Update 100-Point Critic Score Card & Share Preview
+    // Update 100-Point Score Card & Share Preview
     const scoreInfo = calculateCriticScore(gameState, targetMovie);
     if (dom.resultScoreNum) {
       dom.resultScoreNum.textContent = String(scoreInfo.score);
@@ -959,6 +1104,14 @@
   // =========================================================================
   // STATISTICS & EMOJI SHARING
   // =========================================================================
+  function normalizeDistributionArray(dist) {
+    const arr = Array.isArray(dist) ? dist.slice(0, MAX_GUESSES) : [];
+    while (arr.length < MAX_GUESSES) {
+      arr.push(0);
+    }
+    return arr;
+  }
+
   function getStats(mode) {
     const key = mode === "daily" ? STORAGE_KEYS.STATS_DAILY : STORAGE_KEYS.STATS_UNLIMITED;
     const raw = localStorage.getItem(key);
@@ -972,9 +1125,7 @@
           maxStreak: parsed.maxStreak || 0,
           totalScore: typeof parsed.totalScore === "number" ? parsed.totalScore : 0,
           scoredGames: typeof parsed.scoredGames === "number" ? parsed.scoredGames : 0,
-          distribution: Array.isArray(parsed.distribution)
-            ? parsed.distribution
-            : [0, 0, 0, 0, 0, 0, 0, 0]
+          distribution: normalizeDistributionArray(parsed.distribution)
         };
       } catch (e) {}
     }
@@ -985,7 +1136,7 @@
       maxStreak: 0,
       totalScore: 0,
       scoredGames: 0,
-      distribution: [0, 0, 0, 0, 0, 0, 0, 0]
+      distribution: normalizeDistributionArray([])
     };
   }
 
@@ -1047,7 +1198,17 @@
       gameState.status === "won"
         ? `${gameState.guesses.length}/${MAX_GUESSES}`
         : `X/${MAX_GUESSES}`;
-    const memoryBadge = gameState.catalogUsed ? "📖" : "🧠";
+
+    const usedHints = gameState.cluePenalties.length > 0;
+    let memoryBadge = "🧠";
+    if (gameState.catalogUsed && usedHints) {
+      memoryBadge = "📖💡";
+    } else if (gameState.catalogUsed) {
+      memoryBadge = "📖";
+    } else if (usedHints) {
+      memoryBadge = "💡";
+    }
+
     const header =
       currentMode === "daily"
         ? `🎬 CINELE Daily #${gameState.dailyNumber || getDailyPuzzleNumber()} — ${guessesStr} | ⭐ ${scoreInfo.score}/100 ${memoryBadge}`
@@ -1066,7 +1227,11 @@
         toEmoji(ev.actor.status)
       ].join("");
       const rowUsedCatalog = gameState.catalogGuessIndices.includes(idx);
-      return rowUsedCatalog ? `${tiles} 📖` : tiles;
+      const rowUsedHint = gameState.cluePenalties.some((p) => p.guessIndex === idx);
+      const suffixes = [];
+      if (rowUsedCatalog) suffixes.push("📖");
+      if (rowUsedHint) suffixes.push("💡");
+      return suffixes.length > 0 ? `${tiles} ${suffixes.join("")}` : tiles;
     });
 
     return [header, "🗓️🎬🎵🎭📖🌟", ...rows].join("\n");
@@ -1088,7 +1253,7 @@
   }
 
   // =========================================================================
-  // MOVIE CATALOG MODAL (Title-only browse, spoiler-free, -15 pt gate)
+  // MOVIE CATALOG MODAL (Title-only browse, spoiler-free, -12 pt gate)
   // =========================================================================
   function openCatalogModal() {
     normalizeGameState(gameState);
@@ -1097,7 +1262,7 @@
     renderCatalogList("");
 
     if (isPlaying && !gameState.catalogUsed) {
-      // Show safety confirmation gate first so user doesn't lose 15 pts by accident
+      // Show safety confirmation gate first so user doesn't lose 12 pts by accident
       dom.catalogPenaltyGate.classList.remove("hidden");
       dom.catalogBrowserContent.classList.add("hidden");
     } else {
@@ -1143,7 +1308,7 @@
           markCatalogUsedForCurrentGuess();
           selectAutocompleteMovie(m, false);
           dom.searchInput.focus();
-          showToast(`Selected "${m.title}" — click Guess to submit!`);
+          showToast(`Selected "${m.title}" — click Lock In to submit!`);
         }
       });
       dom.catalogList.appendChild(row);
@@ -1205,7 +1370,7 @@
     if (toastTimeout) clearTimeout(toastTimeout);
     toastTimeout = setTimeout(() => {
       dom.toast.classList.add("hidden");
-    }, 2600);
+    }, 2800);
   }
 
   function bindEvents() {
@@ -1216,6 +1381,17 @@
     dom.tabUnlimited.addEventListener("click", () => {
       if (currentMode !== "unlimited") loadOrInitMode("unlimited");
     });
+
+    // Hint Chips (Year, Director, Lead Cast)
+    if (dom.btnHintYear) {
+      dom.btnHintYear.addEventListener("click", () => unlockHint("year"));
+    }
+    if (dom.btnHintDirector) {
+      dom.btnHintDirector.addEventListener("click", () => unlockHint("director"));
+    }
+    if (dom.btnHintActor) {
+      dom.btnHintActor.addEventListener("click", () => unlockHint("actor"));
+    }
 
     // Search Input
     dom.searchInput.addEventListener("input", () => {

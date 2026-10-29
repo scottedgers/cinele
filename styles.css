@@ -465,6 +465,92 @@ body {
   cursor: not-allowed;
 }
 
+/* === HINT / CLUE BAR === */
+.hint-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.hint-chip {
+  background: rgba(18, 24, 38, 0.78);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  color: var(--text-secondary);
+  border-radius: 99px;
+  padding: 6px 12px;
+  font-family: var(--font-sans);
+  font-size: 0.76rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hint-chip:hover:not(:disabled) {
+  border-color: rgba(34, 211, 238, 0.55);
+  background: rgba(34, 211, 238, 0.12);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.hint-chip-cost {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #fda4af;
+  background: rgba(244, 63, 94, 0.16);
+  border: 1px solid rgba(244, 63, 94, 0.35);
+  padding: 1px 6px;
+  border-radius: 99px;
+}
+
+.hint-chip.revealed {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(251, 191, 36, 0.5);
+  color: #fef3c7;
+  cursor: default;
+}
+
+.hint-chip.revealed .hint-chip-value {
+  font-weight: 800;
+  color: #fde68a;
+}
+
+.hint-chip.solved {
+  background: rgba(16, 185, 129, 0.14);
+  border-color: rgba(52, 211, 153, 0.45);
+  color: #d1fae5;
+  cursor: default;
+}
+
+.hint-chip.solved .hint-chip-value {
+  font-weight: 800;
+  color: #6ee7b7;
+}
+
+.guess-badges-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.guess-hint-tag {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #67e8f9;
+  background: rgba(34, 211, 238, 0.14);
+  border: 1px solid rgba(34, 211, 238, 0.35);
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+
 /* Autocomplete Dropdown */
 .autocomplete-list {
   position: absolute;

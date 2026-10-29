@@ -24,12 +24,12 @@
             <line x1="12" y1="17" x2="12.01" y2="17"></line>
           </svg>
         </button>
-        <button id="btn-catalog" class="icon-btn catalog-btn-with-badge" title="Browse Film Archive (-15 Score if used during round)" aria-label="Browse Film Archive">
+        <button id="btn-catalog" class="icon-btn catalog-btn-with-badge" title="Browse Film Archive (-12 Score if used during round)" aria-label="Browse Film Archive">
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
             <rect x="2" y="3" width="20" height="18" rx="3"></rect>
             <path d="M7 3v18M17 3v18M2 9h5M2 15h5M17 9h5M17 15h5"></path>
           </svg>
-          <span id="catalog-btn-badge" class="catalog-btn-badge">-15</span>
+          <span id="catalog-btn-badge" class="catalog-btn-badge">-12</span>
         </button>
       </div>
 
@@ -82,7 +82,7 @@
     <section id="controls-section" class="controls-section">
       <div class="status-row">
         <div class="status-left-group">
-          <span id="guess-counter" class="guess-counter">Guess 0 of 8</span>
+          <span id="guess-counter" class="guess-counter">Guess 0 of 10</span>
           <span id="live-score-badge" class="live-score-badge" title="Current potential Score for this round">
             ⭐ Score: <strong id="live-score-value">100</strong>
           </span>
@@ -117,6 +117,22 @@
 
         <!-- Autocomplete Dropdown -->
         <ul id="autocomplete-list" class="autocomplete-list hidden" role="listbox"></ul>
+      </div>
+
+      <!-- Hint / Clue Bar for Year, Director, and Lead Cast -->
+      <div id="hint-bar" class="hint-bar">
+        <button id="btn-hint-year" class="hint-chip" data-hint="year" type="button">
+          <span class="hint-chip-label">💡 Year Hint</span>
+          <span class="hint-chip-cost">-6</span>
+        </button>
+        <button id="btn-hint-director" class="hint-chip" data-hint="director" type="button">
+          <span class="hint-chip-label">💡 Director Hint</span>
+          <span class="hint-chip-cost">-8</span>
+        </button>
+        <button id="btn-hint-actor" class="hint-chip" data-hint="actor" type="button">
+          <span class="hint-chip-label">💡 Lead Cast Hint</span>
+          <span class="hint-chip-cost">-10</span>
+        </button>
       </div>
     </section>
 
@@ -183,7 +199,7 @@
             </div>
             <p class="empty-board-title">Screening Room Ready</p>
             <p class="empty-board-sub">
-              Deduce the mystery film in <strong>8 frames</strong> or fewer.<br />
+              Deduce the mystery film in <strong>10 frames</strong> or fewer.<br />
               Each guess analyzes <strong>Release Year</strong>, <strong>Director</strong>, <strong>Composer</strong>, <strong>Genre</strong>, <strong>Source Material</strong>, and <strong>Lead Cast</strong>.
             </p>
             <div class="legend-pills">
@@ -212,7 +228,7 @@
       </div>
       <div class="modal-body">
         <p class="modal-intro">
-          <strong>CINELE</strong> is a daily cinema deduction game. Identify the mystery film in <strong>8 guesses</strong> or fewer by cross-referencing directors, composers, genres, and cast.
+          <strong>CINELE</strong> is a daily cinema deduction game. Identify the mystery film in <strong>10 guesses</strong> or fewer by cross-referencing directors, composers, genres, and cast.
         </p>
 
         <div class="howto-steps">
@@ -269,20 +285,20 @@
           In the <strong>Release Year</strong> column, <strong>↑</strong> means the mystery movie was released <em>later</em> (newer) than your guess, and <strong>↓</strong> means it was released <em>earlier</em> (older).
         </p>
 
-        <h3 class="modal-section-heading">⭐ 100-Point Score &amp; Film Archive</h3>
+        <h3 class="modal-section-heading">⭐ 100-Point Score, Clues &amp; Film Archive</h3>
         <div class="color-guide-list">
           <div class="color-guide-item">
             <span class="color-swatch correct">100 PTS</span>
             <div>
-              <strong>Score Scale</strong>
-              <p>Every round starts at a <strong>100/100 Score</strong>. Each incorrect guess deducts <strong>-10 pts</strong>. Even if you run out of guesses, you earn salvage points (+3 per 🟩 Exact category, +1 per 🟨 Partial category unlocked).</p>
+              <strong>10-Guess Score Scale</strong>
+              <p>Every round starts at a <strong>100/100 Score</strong> across <strong>10 guesses</strong>. Each incorrect guess deducts <strong>-8 pts</strong>. Even if you run out of guesses, you earn salvage points (+3 per 🟩 Exact category, +1 per 🟨 Partial category unlocked).</p>
             </div>
           </div>
           <div class="color-guide-item">
-            <span class="color-swatch close">📖 -15 PTS</span>
+            <span class="color-swatch close">💡 HINTS</span>
             <div>
-              <strong>Film Archive Assist vs. 🧠 Pure Memory</strong>
-              <p>Play from memory to earn the <strong>🧠 Pure Memory</strong> badge! Opening the <strong>Film Archive</strong> during an active round applies a one-time <strong>-15 pt</strong> deduction and marks the guess row on your shareable emoji card with <strong>📖</strong>.</p>
+              <strong>Clue Assists (Year, Director &amp; Lead Cast)</strong>
+              <p>Need a nudge? Reveal the mystery film's <strong>Release Year (-6 pts)</strong>, <strong>Director (-8 pts)</strong>, or <strong>Lead Cast (-10 pts)</strong> at any time, or unlock the <strong>Film Archive (-12 pts)</strong>. Solve with zero hints or archive help to earn the <strong>🧠 Pure Memory</strong> badge!</p>
             </div>
           </div>
         </div>
@@ -348,11 +364,11 @@
           <div class="gate-icon">📖</div>
           <h3 class="gate-title">Unlock the Film Archive?</h3>
           <p class="gate-desc">
-            Consulting the Film Archive during an active round applies a one-time <strong>-15 pt Score penalty</strong> and replaces your <strong>🧠 Pure Memory</strong> badge with <strong>📖</strong> on your shareable scorecard.
+            Consulting the Film Archive during an active round applies a one-time <strong>-12 pt Score penalty</strong> and replaces your <strong>🧠 Pure Memory</strong> badge with <strong>📖</strong> on your shareable scorecard.
           </p>
           <div class="gate-actions">
             <button id="btn-confirm-catalog" class="primary-action-btn">
-              📖 Unlock Archive (-15 pts)
+              📖 Unlock Archive (-12 pts)
             </button>
             <button class="secondary-action-btn" data-close-modal="modal-catalog">
               Keep 🧠 Pure Memory
@@ -366,7 +382,7 @@
             <p class="modal-note">
               Browse or filter all eligible movies in the CINELE archive. Click any title to load it into your guess bar.
             </p>
-            <span id="catalog-active-tag" class="catalog-active-tag hidden">📖 Archive Unlocked (-15 pts)</span>
+            <span id="catalog-active-tag" class="catalog-active-tag hidden">📖 Archive Unlocked (-12 pts)</span>
           </div>
           <div class="catalog-filter-row">
             <input
