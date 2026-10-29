@@ -1050,8 +1050,8 @@
     const memoryBadge = gameState.catalogUsed ? "📖" : "🧠";
     const header =
       currentMode === "daily"
-        ? `🎬 CINELE Daily #${gameState.dailyNumber || getDailyPuzzleNumber()} — ${guessesStr} | ⭐ ${scoreInfo.score}/100 ${memoryBadge}`
-        : `🎬 CINELE (Unlimited) — ${guessesStr} | ⭐ ${scoreInfo.score}/100 ${memoryBadge}`;
+        ? `🎬 CINEDLE Daily #${gameState.dailyNumber || getDailyPuzzleNumber()} — ${guessesStr} | ⭐ ${scoreInfo.score}/100 ${memoryBadge}`
+        : `🎬 CINEDLE (Unlimited) — ${guessesStr} | ⭐ ${scoreInfo.score}/100 ${memoryBadge}`;
 
     const rows = gameState.guesses.map((gId, idx) => {
       const gm = movieById.get(gId);

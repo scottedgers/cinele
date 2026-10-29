@@ -38,5 +38,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`🎬 CINELE local server running at http://localhost:${PORT}`);
+  console.log(`🎬 CINEDLE local server running at http://localhost:${PORT}`);
 });
