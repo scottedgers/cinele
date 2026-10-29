@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CINELE — The Daily Movie Guessing Game</title>
+  <title>CINELE — Daily Film Deduction</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <!-- Top Marquee Glow -->
+  <!-- Ambient Anamorphic Lens Glow & Grid Backdrop -->
   <div class="spotlight-bg"></div>
 
   <!-- Header -->
@@ -18,22 +18,16 @@
     <div class="header-inner">
       <div class="header-left">
         <button id="btn-how-to" class="icon-btn" title="How to Play" aria-label="How to Play">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
             <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
             <line x1="12" y1="17" x2="12.01" y2="17"></line>
           </svg>
         </button>
         <button id="btn-catalog" class="icon-btn catalog-btn-with-badge" title="Browse Film Archive (-15 Critic Score if used during round)" aria-label="Browse Film Archive">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
-            <line x1="7" y1="2" x2="7" y2="22"></line>
-            <line x1="17" y1="2" x2="17" y2="22"></line>
-            <line x1="2" y1="12" x2="22" y2="12"></line>
-            <line x1="2" y1="7" x2="7" y2="7"></line>
-            <line x1="2" y1="17" x2="7" y2="17"></line>
-            <line x1="17" y1="17" x2="22" y2="17"></line>
-            <line x1="17" y1="7" x2="22" y2="7"></line>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="18" rx="3"></rect>
+            <path d="M7 3v18M17 3v18M2 9h5M2 15h5M17 9h5M17 15h5"></path>
           </svg>
           <span id="catalog-btn-badge" class="catalog-btn-badge">-15</span>
         </button>
@@ -41,16 +35,26 @@
 
       <div class="brand">
         <div class="brand-title-row">
-          <span class="marquee-star">★</span>
+          <span class="brand-aperture" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="14.31" y1="8" x2="20.05" y2="17.94"></line>
+              <line x1="9.69" y1="8" x2="21.17" y2="8"></line>
+              <line x1="7.38" y1="12" x2="13.12" y2="2.06"></line>
+              <line x1="9.69" y1="16" x2="3.95" y2="6.06"></line>
+              <line x1="14.31" y1="16" x2="2.83" y2="16"></line>
+              <line x1="16.62" y1="12" x2="10.88" y2="21.94"></line>
+            </svg>
+          </span>
           <h1 class="logo-text">CINELE</h1>
-          <span class="marquee-star">★</span>
+          <span class="brand-tag">24FPS</span>
         </div>
-        <p class="logo-subtitle">THE CINEMA GUESSING GAME</p>
+        <p class="logo-subtitle">DAILY FILM DEDUCTION</p>
       </div>
 
       <div class="header-right">
         <button id="btn-stats" class="icon-btn" title="Statistics" aria-label="Statistics">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="20" x2="18" y2="10"></line>
             <line x1="12" y1="20" x2="12" y2="4"></line>
             <line x1="6" y1="20" x2="6" y2="14"></line>
@@ -63,10 +67,10 @@
     <div class="mode-bar">
       <div class="mode-tabs" role="tablist">
         <button id="tab-daily" class="mode-tab active" role="tab" aria-selected="true">
-          <span class="mode-icon">🎟️</span> Daily Feature <span id="daily-number-badge" class="badge-pill">#1</span>
+          <span class="mode-icon">●</span> Daily Feature <span id="daily-number-badge" class="badge-pill">#1</span>
         </button>
         <button id="tab-unlimited" class="mode-tab" role="tab" aria-selected="false">
-          <span class="mode-icon">♾️</span> Unlimited Screening
+          <span class="mode-icon">∞</span> Unlimited Screening
         </button>
       </div>
     </div>
@@ -74,7 +78,7 @@
 
   <!-- Main Game Container -->
   <main class="game-container">
-      <!-- Search & Guess Counter Controls -->
+    <!-- Search & Guess Counter Controls -->
     <section id="controls-section" class="controls-section">
       <div class="status-row">
         <div class="status-left-group">
@@ -87,7 +91,7 @@
           </span>
         </div>
         <button id="btn-give-up" class="give-up-btn hidden" title="Reveal answer for this Unlimited round">
-          🏳️ Give Up
+          Reveal Film
         </button>
       </div>
 
@@ -101,14 +105,14 @@
             type="text"
             id="movie-search-input"
             class="movie-search-input"
-            placeholder="Type a movie title to guess (e.g., Inception, Jaws, Titanic)..."
+            placeholder="Search 600+ films by title (e.g., Parasite, Dune, Pulp Fiction)..."
             autocomplete="off"
             aria-label="Search for a movie to guess"
             aria-expanded="false"
             aria-autocomplete="list"
           />
           <button id="btn-clear-search" class="clear-search-btn hidden" title="Clear search" aria-label="Clear search">✕</button>
-          <button id="btn-submit-guess" class="submit-guess-btn" disabled>Guess</button>
+          <button id="btn-submit-guess" class="submit-guess-btn" disabled>Lock In</button>
         </div>
 
         <!-- Autocomplete Dropdown -->
@@ -142,14 +146,14 @@
 
         <div class="result-actions">
           <button id="btn-share-result" class="primary-action-btn">
-            📋 Share Critic Score
+            📋 Copy Scorecard
           </button>
           <button id="btn-next-unlimited" class="secondary-action-btn">
             🎬 Play Next Movie
           </button>
         </div>
         <div id="daily-countdown-box" class="daily-countdown-box hidden">
-          <span>Next Daily Feature in:</span>
+          <span>Next Daily Feature in</span>
           <strong id="daily-countdown-timer">00:00:00</strong>
         </div>
       </div>
@@ -160,26 +164,33 @@
       <div id="column-headers" class="column-headers">
         <div class="col-header">Release Year</div>
         <div class="col-header">Director</div>
-        <div class="col-header">Sound Composer</div>
+        <div class="col-header">Composer</div>
         <div class="col-header">Genre</div>
         <div class="col-header">Source</div>
-        <div class="col-header">Lead Actor</div>
+        <div class="col-header">Lead Cast</div>
       </div>
 
       <!-- Guesses Container -->
       <div id="guesses-container" class="guesses-container">
         <!-- Empty state before first guess -->
         <div id="empty-board-state" class="empty-board-state">
-          <div class="empty-board-icon">🎞️</div>
-          <p class="empty-board-title">The Projector Is Ready</p>
-          <p class="empty-board-sub">
-            You have <strong>8 guesses</strong> to identify the mystery movie.<br />
-            Each guess reveals clues across <strong>Release Year</strong>, <strong>Director</strong>, <strong>Sound Composer</strong>, <strong>Genre</strong>, <strong>Source Material</strong>, and <strong>Lead Actor</strong>.
-          </p>
-          <div class="legend-pills">
-            <span class="legend-pill correct">🟩 Exact Match</span>
-            <span class="legend-pill close">🟨 Close / Partial</span>
-            <span class="legend-pill wrong">🟥 No Match</span>
+          <div class="viewfinder-corners">
+            <div class="empty-board-icon">
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="18" rx="3"></rect>
+                <polygon points="10 8.5 16 12 10 15.5 10 8.5"></polygon>
+              </svg>
+            </div>
+            <p class="empty-board-title">Screening Room Ready</p>
+            <p class="empty-board-sub">
+              Deduce the mystery film in <strong>8 frames</strong> or fewer.<br />
+              Each guess analyzes <strong>Release Year</strong>, <strong>Director</strong>, <strong>Composer</strong>, <strong>Genre</strong>, <strong>Source Material</strong>, and <strong>Lead Cast</strong>.
+            </p>
+            <div class="legend-pills">
+              <span class="legend-pill correct"><span class="status-dot correct"></span> Exact Match</span>
+              <span class="legend-pill close"><span class="status-dot close"></span> Partial / Close</span>
+              <span class="legend-pill wrong"><span class="status-dot wrong"></span> No Overlap</span>
+            </div>
           </div>
         </div>
       </div>
@@ -196,56 +207,56 @@
   <div id="modal-how-to" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-howto-title">
     <div class="modal-card">
       <div class="modal-header">
-        <h2 id="modal-howto-title" class="modal-title">🎟️ How to Play CINELE</h2>
+        <h2 id="modal-howto-title" class="modal-title">How to Play CINELE</h2>
         <button class="modal-close-btn" data-close-modal="modal-how-to" aria-label="Close">✕</button>
       </div>
       <div class="modal-body">
         <p class="modal-intro">
-          Inspired by <em>Theaterle</em>, <strong>CINELE</strong> challenges you to guess the mystery film in <strong>8 tries</strong> or fewer!
+          <strong>CINELE</strong> is a daily cinema deduction game. Identify the mystery film in <strong>8 guesses</strong> or fewer by cross-referencing directors, composers, genres, and cast.
         </p>
 
         <div class="howto-steps">
           <div class="howto-step">
-            <div class="step-badge">1</div>
+            <div class="step-badge">01</div>
             <div>
-              <strong>Make a Guess</strong>
-              <p>Search and select any movie from the catalog of 600+ iconic films.</p>
+              <strong>Lock In Any Film</strong>
+              <p>Search and select any movie from the curated catalog of 600+ iconic films.</p>
             </div>
           </div>
           <div class="howto-step">
-            <div class="step-badge">2</div>
+            <div class="step-badge">02</div>
             <div>
-              <strong>Read the 6 Clue Tiles</strong>
-              <p>After each guess, 6 category tiles flip over and change color to show how close your guess is to the mystery film.</p>
+              <strong>Decode the 6 Telemetry Tiles</strong>
+              <p>Each guess reveals how your film compares to the mystery target across 6 production categories.</p>
             </div>
           </div>
         </div>
 
-        <h3 class="modal-section-heading">Clue Colors & Meaning</h3>
+        <h3 class="modal-section-heading">Signal Colors &amp; Meaning</h3>
         <div class="color-guide-list">
           <div class="color-guide-item">
-            <span class="color-swatch correct">🟩 Green</span>
+            <span class="color-swatch correct">🟩 Exact</span>
             <div>
-              <strong>Exact Match!</strong>
+              <strong>Exact Match</strong>
               <p>Same Release Year, same Director(s), same Composer(s), exact same Genres, same Source Material, or same Primary Lead Actor.</p>
             </div>
           </div>
           <div class="color-guide-item">
-            <span class="color-swatch close">🟨 Gold</span>
+            <span class="color-swatch close">🟨 Partial</span>
             <div>
-              <strong>Close / Partial Match!</strong>
+              <strong>Close / Partial Match</strong>
               <ul class="compact-list">
                 <li><strong>Release Year:</strong> Within <strong>±5 years</strong> of the mystery movie.</li>
                 <li><strong>Director:</strong> Shares a co-director credit.</li>
-                <li><strong>Sound Composer:</strong> Shares a co-composer or music collaborator.</li>
+                <li><strong>Composer:</strong> Shares a co-composer or music collaborator.</li>
                 <li><strong>Genre:</strong> Shares <strong>1 of the 2</strong> genres with the mystery movie.</li>
                 <li><strong>Source:</strong> Both are written fiction adaptations (<em>Novel ↔ Short Story ↔ Comic</em>) or stage/folklore adaptations.</li>
-                <li><strong>Lead Actor:</strong> An actor in your guess's Top-2 cast appears in the mystery film's Top-2 cast!</li>
+                <li><strong>Lead Cast:</strong> An actor in your guess's Top-2 cast appears in the mystery film's Top-2 cast.</li>
               </ul>
             </div>
           </div>
           <div class="color-guide-item">
-            <span class="color-swatch wrong">🟥 Burgundy</span>
+            <span class="color-swatch wrong">🟥 Miss</span>
             <div>
               <strong>No Match</strong>
               <p>More than 5 years apart, or no overlap in that category.</p>
@@ -253,7 +264,7 @@
           </div>
         </div>
 
-        <h3 class="modal-section-heading">Arrows (↑ / ↓)</h3>
+        <h3 class="modal-section-heading">Timeline Arrows (↑ / ↓)</h3>
         <p class="modal-note">
           In the <strong>Release Year</strong> column, <strong>↑</strong> means the mystery movie was released <em>later</em> (newer) than your guess, and <strong>↓</strong> means it was released <em>earlier</em> (older).
         </p>
@@ -261,14 +272,14 @@
         <h3 class="modal-section-heading">⭐ 100-Point Critic Score &amp; Film Archive</h3>
         <div class="color-guide-list">
           <div class="color-guide-item">
-            <span class="color-swatch correct">100 pts</span>
+            <span class="color-swatch correct">100 PTS</span>
             <div>
               <strong>Critic Score Scale</strong>
-              <p>Every round starts at a <strong>100/100 Critic Score</strong>. Each incorrect guess deducts <strong>-10 pts</strong>. Even if you run out of guesses, you earn salvage points (+3 per 🟩 Green category, +1 per 🟨 Gold category unlocked).</p>
+              <p>Every round starts at a <strong>100/100 Critic Score</strong>. Each incorrect guess deducts <strong>-10 pts</strong>. Even if you run out of guesses, you earn salvage points (+3 per 🟩 Exact category, +1 per 🟨 Partial category unlocked).</p>
             </div>
           </div>
           <div class="color-guide-item">
-            <span class="color-swatch close">📖 -15 pts</span>
+            <span class="color-swatch close">📖 -15 PTS</span>
             <div>
               <strong>Film Archive Assist vs. 🧠 Pure Memory</strong>
               <p>Play from memory to earn the <strong>🧠 Pure Memory</strong> badge! Opening the <strong>Film Archive</strong> during an active round applies a one-time <strong>-15 pt</strong> deduction and marks the guess row on your shareable emoji card with <strong>📖</strong>.</p>
@@ -277,7 +288,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button class="primary-action-btn full-width" data-close-modal="modal-how-to">Got It — Roll Film!</button>
+        <button class="primary-action-btn full-width" data-close-modal="modal-how-to">Enter Screening Room</button>
       </div>
     </div>
   </div>
@@ -286,7 +297,7 @@
   <div id="modal-stats" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-stats-title">
     <div class="modal-card">
       <div class="modal-header">
-        <h2 id="modal-stats-title" class="modal-title">📊 Box Office Statistics</h2>
+        <h2 id="modal-stats-title" class="modal-title">Box Office Telemetry</h2>
         <button class="modal-close-btn" data-close-modal="modal-stats" aria-label="Close">✕</button>
       </div>
       <div class="modal-body">
@@ -318,7 +329,7 @@
           </div>
         </div>
 
-        <h3 class="modal-section-heading">Guess Distribution</h3>
+        <h3 class="modal-section-heading">Frame Distribution</h3>
         <div id="stats-distribution" class="stats-distribution"></div>
       </div>
     </div>
@@ -328,20 +339,20 @@
   <div id="modal-catalog" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-catalog-title">
     <div class="modal-card modal-card-wide">
       <div class="modal-header">
-        <h2 id="modal-catalog-title" class="modal-title">🎞️ Film Archive (<span id="catalog-count">605</span> Movies)</h2>
+        <h2 id="modal-catalog-title" class="modal-title">Film Archive (<span id="catalog-count">605</span> Titles)</h2>
         <button class="modal-close-btn" data-close-modal="modal-catalog" aria-label="Close">✕</button>
       </div>
       <div class="modal-body">
         <!-- Safety Warning Gate before applying the -15 pt Catalog Penalty -->
         <div id="catalog-penalty-gate" class="catalog-penalty-gate hidden">
           <div class="gate-icon">📖</div>
-          <h3 class="gate-title">Consult the Film Archive?</h3>
+          <h3 class="gate-title">Unlock the Film Archive?</h3>
           <p class="gate-desc">
-            Opening the Film Archive during an active round applies a one-time <strong>-15 pt Critic Score penalty</strong> and replaces your <strong>🧠 Pure Memory</strong> badge with <strong>📖</strong> on your shareable score card.
+            Consulting the Film Archive during an active round applies a one-time <strong>-15 pt Critic Score penalty</strong> and replaces your <strong>🧠 Pure Memory</strong> badge with <strong>📖</strong> on your shareable scorecard.
           </p>
           <div class="gate-actions">
             <button id="btn-confirm-catalog" class="primary-action-btn">
-              📖 Unlock Film Archive (-15 pts)
+              📖 Unlock Archive (-15 pts)
             </button>
             <button class="secondary-action-btn" data-close-modal="modal-catalog">
               Keep 🧠 Pure Memory
@@ -353,7 +364,7 @@
         <div id="catalog-browser-content">
           <div class="catalog-status-bar">
             <p class="modal-note">
-              Browse or filter all eligible movies in the CINELE archive. Click any movie title to load it into your guess box!
+              Browse or filter all eligible movies in the CINELE archive. Click any title to load it into your guess bar.
             </p>
             <span id="catalog-active-tag" class="catalog-active-tag hidden">📖 Archive Unlocked (-15 pts)</span>
           </div>
@@ -362,7 +373,7 @@
               type="text"
               id="catalog-filter-input"
               class="catalog-filter-input"
-              placeholder="Filter by title..."
+              placeholder="Filter archive by title..."
             />
           </div>
           <div id="catalog-list" class="catalog-list"></div>
