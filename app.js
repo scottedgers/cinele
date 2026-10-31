@@ -64,6 +64,21 @@
 
   // Epoch for Daily Feature numbering (Oct 28, 2026 -> Day #1)
   const LAUNCH_EPOCH_MS = Date.UTC(2026, 9, 28);
+  const DEFAULT_SHARE_URL = "https://scottedgers.github.io/cinele/";
+
+  function getShareUrl() {
+    if (
+      typeof window !== "undefined" &&
+      window.location &&
+      (window.location.protocol === "https:" || window.location.protocol === "http:") &&
+      window.location.hostname !== "localhost" &&
+      window.location.hostname !== "127.0.0.1"
+    ) {
+      const cleanPath = window.location.pathname.replace(/\/index\.html$/i, "/");
+      return `${window.location.origin}${cleanPath}`;
+    }
+    return DEFAULT_SHARE_URL;
+  }
 
   // App State
   let currentMode = "daily"; // "daily" | "unlimited"
@@ -75,15 +90,40 @@
     status: "playing", // "playing" | "won" | "lost"
     dateKey: null,
     dailyNumber: 1,
+    starterClue: null, // "director" | "actor" | "composer" (free opening wheel clue)
     catalogUsed: false, // flat one-time -12 penalty per round when Archive opened
     catalogGuessIndices: [], // 0-based guess indices where Archive was unlocked/used
     cluePenalties: [] // array of { id, label, points, guessIndex } for unlocked hints
+  };
+
+  const WHEEL_CATEGORIES = {
+    director: {
+      id: "director",
+      label: "Director",
+      icon: "🎬",
+      sliceAngles: [30, 210]
+    },
+    actor: {
+      id: "actor",
+      label: "Lead Actor",
+      icon: "🌟",
+      sliceAngles: [90, 270]
+    },
+    composer: {
+      id: "composer",
+      label: "Composer",
+      icon: "🎵",
+      sliceAngles: [150, 330]
+    }
   };
 
   let selectedMovieId = null;
   let acMatches = [];
   let acHighlightIndex = -1;
   let countdownInterval = null;
+  let wheelSpinTimer = null;
+  let wheelLandingTimer = null;
+  let wheelAutoCloseTimer = null;
 
   // DOM Elements
   const dom = {
@@ -96,6 +136,10 @@
     liveScoreValue: document.getElementById("live-score-value"),
     liveMemoryBadge: document.getElementById("live-memory-badge"),
     btnGiveUp: document.getElementById("btn-give-up"),
+
+    starterClueBanner: document.getElementById("starter-clue-banner"),
+    starterClueCat: document.getElementById("starter-clue-cat"),
+    starterClueVal: document.getElementById("starter-clue-val"),
 
     controlsSection: document.getElementById("controls-section"),
     searchInput: document.getElementById("movie-search-input"),
@@ -152,7 +196,15 @@
     catalogBrowserContent: document.getElementById("catalog-browser-content"),
     catalogActiveTag: document.getElementById("catalog-active-tag"),
     catalogFilterInput: document.getElementById("catalog-filter-input"),
-    catalogList: document.getElementById("catalog-list")
+    catalogList: document.getElementById("catalog-list"),
+
+    modalWheel: document.getElementById("modal-wheel"),
+    wheelSubtitle: document.getElementById("wheel-subtitle"),
+    clueWheelDisc: document.getElementById("clue-wheel-disc"),
+    wheelResultCard: document.getElementById("wheel-result-card"),
+    wheelResultLabel: document.getElementById("wheel-result-label"),
+    wheelResultValue: document.getElementById("wheel-result-value"),
+    btnWheelContinue: document.getElementById("btn-wheel-continue")
   };
 
   // Lookup helper
@@ -332,6 +384,7 @@
   // =========================================================================
   function normalizeGameState(state) {
     if (!state) return state;
+    state.starterClue = state.starterClue || null;
     state.catalogUsed = Boolean(state.catalogUsed);
     state.catalogGuessIndices = Array.isArray(state.catalogGuessIndices)
       ? state.catalogGuessIndices
@@ -483,8 +536,16 @@
   }
 
   // =========================================================================
-  // HINT / CLUE SYSTEM (YEAR, DIRECTOR, LEAD CAST)
+  // HINT / CLUE SYSTEM (YEAR, DIRECTOR, LEAD CAST) & OPENING WHEEL
   // =========================================================================
+  function getStarterClueValue(clueType, targetMovie) {
+    if (!targetMovie) return "";
+    if (clueType === "director") return targetMovie.director;
+    if (clueType === "actor") return targetMovie.actors[0] || "";
+    if (clueType === "composer") return targetMovie.composers.join(" & ");
+    return "";
+  }
+
   function getHintTargetDisplayValue(hintType, targetMovie) {
     if (!targetMovie) return "";
     if (hintType === "year") return String(targetMovie.year);
@@ -511,6 +572,8 @@
     const targetMovie = movieById.get(gameState.targetMovieId);
     if (!hintMeta || !targetMovie) return;
 
+    if (gameState.starterClue === hintType) return;
+
     const alreadyUnlocked = gameState.cluePenalties.some((p) => p.id === hintType);
     if (alreadyUnlocked) return;
 
@@ -533,6 +596,130 @@
     showToast(`${hintMeta.prefix} ${valueStr} (-${hintMeta.points} Score)`);
   }
 
+  function updateStarterClueBannerUI(targetMovie) {
+    if (!dom.starterClueBanner) return;
+    const clueType = gameState.starterClue;
+    const meta = clueType ? WHEEL_CATEGORIES[clueType] : null;
+
+    if (!meta || !targetMovie) {
+      dom.starterClueBanner.classList.add("hidden");
+      return;
+    }
+
+    dom.starterClueBanner.classList.remove("hidden");
+    if (dom.starterClueCat) {
+      dom.starterClueCat.textContent = `${meta.icon} ${meta.label}:`;
+    }
+    if (dom.starterClueVal) {
+      dom.starterClueVal.textContent = getStarterClueValue(clueType, targetMovie);
+    }
+  }
+
+  function clearWheelTimers() {
+    if (wheelSpinTimer) {
+      clearTimeout(wheelSpinTimer);
+      wheelSpinTimer = null;
+    }
+    if (wheelLandingTimer) {
+      clearTimeout(wheelLandingTimer);
+      wheelLandingTimer = null;
+    }
+    if (wheelAutoCloseTimer) {
+      clearTimeout(wheelAutoCloseTimer);
+      wheelAutoCloseTimer = null;
+    }
+  }
+
+  function closeStarterWheelModal() {
+    clearWheelTimers();
+    if (dom.modalWheel) {
+      dom.modalWheel.classList.add("hidden");
+    }
+    updateLiveScoreAndCatalogUI();
+    if (dom.searchInput && gameState.status === "playing") {
+      dom.searchInput.focus();
+    }
+  }
+
+  function maybeTriggerStarterWheel() {
+    normalizeGameState(gameState);
+    if (gameState.status !== "playing" || gameState.starterClue) return;
+
+    const targetMovie = movieById.get(gameState.targetMovieId);
+    if (!targetMovie || !dom.modalWheel || !dom.clueWheelDisc) return;
+
+    clearWheelTimers();
+
+    const catKeys = Object.keys(WHEEL_CATEGORIES);
+    const chosenKey = catKeys[Math.floor(Math.random() * catKeys.length)];
+    const meta = WHEEL_CATEGORIES[chosenKey];
+    const clueVal = getStarterClueValue(chosenKey, targetMovie);
+
+    // Persist immediately so refreshing mid-spin keeps the same starter clue
+    gameState.starterClue = chosenKey;
+    saveCurrentState();
+
+    // Pick one of the two matching slices on the 6-slice wheel + natural jitter
+    const sliceAngle =
+      meta.sliceAngles[Math.floor(Math.random() * meta.sliceAngles.length)];
+    const jitter = Math.floor(Math.random() * 25) - 12;
+    const fullSpins = (5 + Math.floor(Math.random() * 2)) * 360;
+    const targetRotation = fullSpins + (360 - sliceAngle) + jitter;
+
+    if (dom.wheelSubtitle) {
+      dom.wheelSubtitle.textContent =
+        "Locking onto Director, Lead Actor, or Composer...";
+    }
+    if (dom.wheelResultCard) {
+      dom.wheelResultCard.classList.remove("landed");
+    }
+    if (dom.wheelResultLabel) {
+      dom.wheelResultLabel.textContent = "SPINNING REEL...";
+    }
+    if (dom.wheelResultValue) {
+      dom.wheelResultValue.textContent = "•••";
+    }
+    if (dom.btnWheelContinue) {
+      dom.btnWheelContinue.textContent = "Skip Spin →";
+    }
+
+    dom.clueWheelDisc.style.transition = "none";
+    dom.clueWheelDisc.style.transform = "rotate(0deg)";
+    dom.modalWheel.classList.remove("hidden");
+
+    // Start spin after modal entrance frame
+    wheelSpinTimer = setTimeout(() => {
+      dom.clueWheelDisc.style.transition =
+        "transform 2.4s cubic-bezier(0.14, 0.84, 0.22, 1)";
+      dom.clueWheelDisc.style.transform = `rotate(${targetRotation}deg)`;
+    }, 120);
+
+    // Reveal landed clue and schedule auto-close into the board
+    wheelLandingTimer = setTimeout(() => {
+      if (dom.wheelResultCard) {
+        dom.wheelResultCard.classList.add("landed");
+      }
+      if (dom.wheelSubtitle) {
+        dom.wheelSubtitle.textContent =
+          "Opening clue unlocked! Entering screening room...";
+      }
+      if (dom.wheelResultLabel) {
+        dom.wheelResultLabel.textContent = `${meta.icon} ${meta.label.toUpperCase()} UNLOCKED`;
+      }
+      if (dom.wheelResultValue) {
+        dom.wheelResultValue.textContent = clueVal;
+      }
+      if (dom.btnWheelContinue) {
+        dom.btnWheelContinue.textContent = "Enter Screening Room →";
+      }
+      updateLiveScoreAndCatalogUI();
+
+      wheelAutoCloseTimer = setTimeout(() => {
+        closeStarterWheelModal();
+      }, 1500);
+    }, 2550);
+  }
+
   function updateHintChipsUI(targetMovie) {
     const chipMap = [
       { type: "year", btn: dom.btnHintYear },
@@ -543,14 +730,27 @@
     chipMap.forEach(({ type, btn }) => {
       if (!btn) return;
       const meta = SCORE_CONFIG.HINTS[type];
+      const unlockedByStarter = gameState.starterClue === type;
       const unlockedByHint = gameState.cluePenalties.some((p) => p.id === type);
       const solvedByGuess = isCategorySolvedOnBoard(type, targetMovie);
-      const val = getHintTargetDisplayValue(type, targetMovie);
+      const val = unlockedByStarter
+        ? getStarterClueValue(type, targetMovie)
+        : getHintTargetDisplayValue(type, targetMovie);
 
       btn.classList.remove("revealed", "solved");
       btn.disabled = false;
 
-      if (unlockedByHint) {
+      if (unlockedByStarter) {
+        btn.classList.add("solved");
+        btn.disabled = true;
+        btn.innerHTML = `
+          <div class="hint-chip-top">
+            <span class="hint-chip-cat">${meta.iconSvg} ${meta.categoryTitle}</span>
+            <span class="hint-chip-cost">FREE CLUE ★</span>
+          </div>
+          <span class="hint-chip-value">${escapeHtml(val)}</span>
+        `;
+      } else if (unlockedByHint) {
         btn.classList.add("revealed");
         btn.disabled = true;
         btn.innerHTML = `
@@ -624,6 +824,7 @@
       }
     }
 
+    updateStarterClueBannerUI(targetMovie);
     updateHintChipsUI(targetMovie);
   }
 
@@ -686,6 +887,7 @@
 
     resetSearchBox();
     renderFullBoard(false);
+    maybeTriggerStarterWheel();
   }
 
   function startNewUnlimitedGame() {
@@ -697,6 +899,7 @@
       status: "playing",
       dateKey: getTodayDateKey(),
       dailyNumber: null,
+      starterClue: null,
       catalogUsed: false,
       catalogGuessIndices: [],
       cluePenalties: []
@@ -704,6 +907,7 @@
     saveCurrentState();
     resetSearchBox();
     renderFullBoard(false);
+    maybeTriggerStarterWheel();
   }
 
   function saveCurrentState() {
@@ -1255,7 +1459,7 @@
       return suffixes.length > 0 ? `${tiles} ${suffixes.join("")}` : tiles;
     });
 
-    return [header, "🗓️🎬🎵🎭📖🌟", ...rows].join("\n");
+    return [header, "🗓️🎬🎵🎭📖🌟", ...rows, getShareUrl()].join("\n");
   }
 
   function shareCurrentResult() {
@@ -1527,6 +1731,12 @@
     dom.statsTabDaily.addEventListener("click", () => renderStatsModal("daily"));
     dom.statsTabUnlimited.addEventListener("click", () => renderStatsModal("unlimited"));
 
+    if (dom.btnWheelContinue) {
+      dom.btnWheelContinue.addEventListener("click", () => {
+        closeStarterWheelModal();
+      });
+    }
+
     document.querySelectorAll("[data-close-modal]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const modalId = btn.getAttribute("data-close-modal");
@@ -1537,7 +1747,11 @@
     document.querySelectorAll(".modal-overlay").forEach((overlay) => {
       overlay.addEventListener("click", (e) => {
         if (e.target === overlay) {
-          overlay.classList.add("hidden");
+          if (overlay === dom.modalWheel) {
+            closeStarterWheelModal();
+          } else {
+            overlay.classList.add("hidden");
+          }
         }
       });
     });

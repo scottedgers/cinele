@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261029-4" />
+  <link rel="stylesheet" href="styles.css?v=20261031-2" />
 </head>
 <body>
   <!-- Ambient Anamorphic Lens Glow & Grid Backdrop -->
@@ -93,6 +93,18 @@
         <button id="btn-give-up" class="give-up-btn hidden" title="Reveal answer for this Unlimited round">
           Reveal Film
         </button>
+      </div>
+
+      <!-- Free Opening Reel Clue Banner (populated by Opening Wheel) -->
+      <div id="starter-clue-banner" class="starter-clue-banner hidden" aria-live="polite">
+        <div class="starter-clue-left">
+          <span class="starter-clue-badge">🎡 OPENING CLUE</span>
+          <span id="starter-clue-cat" class="starter-clue-cat">Director</span>
+        </div>
+        <div class="starter-clue-right">
+          <strong id="starter-clue-val" class="starter-clue-val">—</strong>
+          <span class="starter-clue-free">FREE</span>
+        </div>
       </div>
 
       <div class="search-wrapper">
@@ -416,7 +428,64 @@
     </div>
   </div>
 
-  <script src="movies.js?v=20261029-4"></script>
-  <script src="app.js?v=20261029-4"></script>
+  <!-- MODAL: Opening Clue Spinning Wheel -->
+  <div id="modal-wheel" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-wheel-title">
+    <div class="modal-card modal-card-wheel">
+      <div class="wheel-modal-header">
+        <span class="wheel-kicker">🎡 FREE OPENING REEL CLUE • 0 PT PENALTY</span>
+        <h2 id="modal-wheel-title" class="modal-title">Spinning Your Starter Clue</h2>
+        <p id="wheel-subtitle" class="wheel-subtitle">Locking onto Director, Lead Actor, or Composer...</p>
+      </div>
+
+      <div class="wheel-stage">
+        <div class="wheel-pointer" aria-hidden="true">▼</div>
+        <div class="wheel-outer-rim">
+          <div id="clue-wheel-disc" class="clue-wheel-disc">
+            <div class="wheel-slice-label" style="--slice-angle: 30deg;">
+              <span class="wheel-slice-icon">🎬</span>
+              <span class="wheel-slice-text">DIRECTOR</span>
+            </div>
+            <div class="wheel-slice-label" style="--slice-angle: 90deg;">
+              <span class="wheel-slice-icon">🌟</span>
+              <span class="wheel-slice-text">LEAD ACTOR</span>
+            </div>
+            <div class="wheel-slice-label" style="--slice-angle: 150deg;">
+              <span class="wheel-slice-icon">🎵</span>
+              <span class="wheel-slice-text">COMPOSER</span>
+            </div>
+            <div class="wheel-slice-label" style="--slice-angle: 210deg;">
+              <span class="wheel-slice-icon">🎬</span>
+              <span class="wheel-slice-text">DIRECTOR</span>
+            </div>
+            <div class="wheel-slice-label" style="--slice-angle: 270deg;">
+              <span class="wheel-slice-icon">🌟</span>
+              <span class="wheel-slice-text">LEAD ACTOR</span>
+            </div>
+            <div class="wheel-slice-label" style="--slice-angle: 330deg;">
+              <span class="wheel-slice-icon">🎵</span>
+              <span class="wheel-slice-text">COMPOSER</span>
+            </div>
+          </div>
+          <div class="wheel-center-hub" aria-hidden="true">
+            <span>24FPS</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="wheel-result-card" class="wheel-result-card">
+        <span id="wheel-result-label" class="wheel-result-label">SPINNING REEL...</span>
+        <strong id="wheel-result-value" class="wheel-result-value">•••</strong>
+      </div>
+
+      <div class="wheel-modal-footer">
+        <button id="btn-wheel-continue" class="primary-action-btn full-width" type="button">
+          Enter Screening Room →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="movies.js?v=20261031-2"></script>
+  <script src="app.js?v=20261031-2"></script>
 </body>
 </html>
